@@ -14,14 +14,18 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:5175",
+      "https://gta-assistant.vercel.app",
     ],
     methods: ["GET", "POST"],
+    credentials: true,
   })
 );
-app.use(express.json());
-app.use(rateLimiter);
-app.use("/api/chat", chatRoutes);
 
+app.use(express.json());
+
+app.use(rateLimiter);
+
+app.use("/api/chat", chatRoutes);
 
 app.get("/", (req, res) => {
   res.json({
@@ -29,8 +33,8 @@ app.get("/", (req, res) => {
   });
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
