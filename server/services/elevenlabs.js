@@ -22,7 +22,12 @@ export async function generateSpeech(text) {
 
     return Buffer.from(response.data).toString("base64");
   } catch (err) {
-    console.error("❌ ElevenLabs Error:", err.response?.data || err.message);
+    console.error(
+  "❌ ElevenLabs Error:",
+  err.response?.data
+    ? Buffer.from(err.response.data).toString()
+    : err.message
+);
     return null;
   }
 }
