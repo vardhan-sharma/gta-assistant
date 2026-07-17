@@ -9,20 +9,26 @@ const providers = [
 ];
 
 function shouldFallback(err) {
-  const status =
-    err?.status ||
-    err?.code ||
-    err?.response?.status;
+  console.dir(err, { depth: null });
 
-  const message = (err?.message || "").toLowerCase();
+  const status =
+    Number(err?.status) ||
+    Number(err?.code) ||
+    Number(err?.response?.status) ||
+    Number(err?.error?.code);
+
+  const message = JSON.stringify(err).toLowerCase();
+
+  console.log("Status:", status);
+  console.log("Fallback:", [429, 500, 502, 503, 504].includes(status));
 
   return (
     [429, 500, 502, 503, 504].includes(status) ||
-    message.includes("timeout") ||
-    message.includes("network") ||
-    message.includes("unavailable") ||
     message.includes("resource_exhausted") ||
-    message.includes("quota")
+    message.includes("quota") ||
+    message.includes("unavailable") ||
+    message.includes("timeout") ||
+    message.includes("network")
   );
 }
 
