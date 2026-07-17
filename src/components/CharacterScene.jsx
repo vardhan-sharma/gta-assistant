@@ -13,22 +13,24 @@ function CharacterScene() {
         backgroundImage: `url(${bg})`,
       }}
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50" />
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/55" />
 
       {/* Heading */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 text-center">
-        <h1 className="text-4xl font-black text-white tracking-widest">
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 text-center">
+
+        <h1 className="text-5xl font-black text-white tracking-[5px]">
           CHOOSE YOUR
         </h1>
 
-        <h2 className="text-5xl font-black text-orange-400 mt-2">
+        <h2 className="text-6xl font-black text-orange-400 mt-1">
           AI PARTNER
         </h2>
 
-        <p className="text-zinc-300 mt-2 text-lg">
+        <p className="text-zinc-400 mt-3 text-base tracking-wide">
           Select your companion before entering Los Santos
         </p>
+
       </div>
 
       {/* Characters */}

@@ -37,9 +37,9 @@ function CharacterCarousel({ characters, selected, setSelected }) {
           src={characters[0].image}
           alt={characters[0].name}
           onClick={() => {
-  setSelected(0);
-  navigate("/assistant");
-}}
+           setSelected(0);
+            navigate("/assistant");
+        }}
           className="
             max-h-[72vh]
             object-contain

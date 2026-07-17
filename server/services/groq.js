@@ -7,7 +7,7 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-export async function askGroq(history) {
+export async function askGroq(history, character) {
   const messages = history.map((msg) => ({
     role: msg.role === "model" ? "assistant" : msg.role,
     content: msg.parts[0].text,

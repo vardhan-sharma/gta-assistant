@@ -7,7 +7,7 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-export async function askGemini(history) {
+export async function askGemini(history,character) {
   try {
     const systemPrompt = `
 You are Michael AI from GTA Assistant.

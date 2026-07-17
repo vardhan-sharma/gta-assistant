@@ -1,4 +1,5 @@
 import { generateReply } from "../services/aiManager.js";
+import { generateSpeech } from "../services/elevenlabs.js";
 
 export const chatWithAI = async (req, res) => {
   try {
@@ -16,15 +17,18 @@ export const chatWithAI = async (req, res) => {
 
     const reply = await generateReply(cleanHistory, character);
 
+    const audio = await generateSpeech(reply);
+
     res.json({
       reply,
+      audio,
     });
 
   } catch (err) {
-    console.error("❌ AI Error:", err);
+  console.error("❌ AI Error:", err);
 
-    res.status(500).json({
-      error: "AI service temporarily unavailable.",
-    });
+  res.status(500).json({
+    error: err.message || "AI service temporarily unavailable.",
+  });
+}
   }
-};

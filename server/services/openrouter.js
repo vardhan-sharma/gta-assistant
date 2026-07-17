@@ -8,14 +8,14 @@ const client = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
 });
 
-export async function askOpenRouter(history) {
+export async function askOpenRouter(history, character) {
   const messages = history.map((msg) => ({
     role: msg.role === "model" ? "assistant" : msg.role,
     content: msg.parts[0].text,
   }));
 
   const completion = await client.chat.completions.create({
-    model: "meta-llama/llama-3.3-70b-instruct:free",
+  model: process.env.OPENROUTER_MODEL,
     messages,
     temperature: 0.8,
   });
