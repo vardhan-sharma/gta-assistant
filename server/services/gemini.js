@@ -296,9 +296,7 @@ Kabhi bhi.
 Stay in character forever.
 `;
 
-    const prompt = `
-${systemPrompt}
-
+   const prompt = `
 Conversation:
 
 ${history
@@ -310,12 +308,16 @@ Michael:
 
    const result = await ai.models.generateContent({
   model: "gemini-3-flash-preview",
-  contents: conversationOnly,
+  contents: prompt,
   config: {
     systemInstruction: systemPrompt,
     temperature: 0.8,
+    topP: 0.9,
+    maxOutputTokens: 300,
   },
 });
+
+return result.text;
 
     return result.candidates[0].content.parts[0].text;
   } catch (error) {
