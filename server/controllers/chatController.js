@@ -15,20 +15,21 @@ export const chatWithAI = async (req, res) => {
         msg.parts[0].text.trim() !== ""
     );
 
-    const reply = await generateReply(cleanHistory, character);
+    const result = await generateReply(cleanHistory, character);
 
-    const audio = await generateSpeech(reply);
+    const audio = await generateSpeech(result.reply);
 
     res.json({
-      reply,
+      reply: result.reply,
+      provider: result.provider,
       audio,
     });
 
   } catch (err) {
-  console.error("❌ AI Error:", err);
+    console.error("❌ AI Error:", err);
 
-  res.status(500).json({
-    error: err.message || "AI service temporarily unavailable.",
-  });
-}
+    res.status(500).json({
+      error: err.message || "AI service temporarily unavailable.",
+    });
   }
+};

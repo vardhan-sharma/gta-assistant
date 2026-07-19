@@ -52,7 +52,20 @@ export default function useChat(character = "michael") {
         ],
       }));
 
-      const aiReply = await askBackend(history, character);
+      const result = await askBackend(history, character);
+
+      const aiReply = result.reply;
+
+      if (result.audio) {
+  const audio = new Audio(
+    `data:audio/mpeg;base64,${result.audio}`
+  );
+  audio.play();
+
+  audio.play().catch((err) => {
+    console.error("Audio play failed:", err);
+  });
+}
 
       setMessages((prev) => [
         ...prev,

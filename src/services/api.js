@@ -18,5 +18,5 @@ export async function askBackend(history, character = "michael") {
     throw new Error(data.error || "Server Error");
   }
 
-  return data.reply;
+  return data;
 }

@@ -3,9 +3,21 @@ import { askGroq } from "./groq.js";
 import { askOpenRouter } from "./openrouter.js";
 
 const providers = [
-  { name: "Gemini", icon: "🟢", fn: askGemini },
-  { name: "Groq", icon: "🔵", fn: askGroq },
-  { name: "OpenRouter", icon: "🟠", fn: askOpenRouter },
+  {
+    name: "Gemini",
+    icon: "🟢",
+    fn: askGemini,
+  },
+  {
+    name: "Groq",
+    icon: "🔵",
+    fn: askGroq,
+  },
+  {
+    name: "OpenRouter",
+    icon: "🟠",
+    fn: askOpenRouter,
+  },
 ];
 
 function shouldFallback(err) {
@@ -20,7 +32,6 @@ function shouldFallback(err) {
   const message = JSON.stringify(err).toLowerCase();
 
   console.log("Status:", status);
-  console.log("Fallback:", [429, 500, 502, 503, 504].includes(status));
 
   return (
     [429, 500, 502, 503, 504].includes(status) ||
@@ -33,31 +44,33 @@ function shouldFallback(err) {
 }
 
 export async function generateReply(history, character) {
-  let lastError;
+  let lastError = null;
 
   for (const provider of providers) {
     const start = Date.now();
 
     try {
-      console.log(`${provider.icon} Using ${provider.name}`);
+      console.log(`${provider.icon} Using ${provider.name}...`);
 
       const reply = await provider.fn(history, character);
 
       console.log(
-        `⚡ ${provider.name} responded in ${Date.now() - start} ms`
+        `✅ ${provider.name} responded in ${Date.now() - start} ms`
       );
 
-      return reply;
+      return {
+        reply,
+        provider: provider.name,
+      };
 
     } catch (err) {
-
       lastError = err;
 
       console.error(
-        `${provider.icon} ${provider.name} Failed (${Date.now() - start} ms)`
+        `❌ ${provider.name} Failed (${Date.now() - start} ms)`
       );
 
-      console.error(err.message);
+      console.error(err);
 
       if (!shouldFallback(err)) {
         throw err;
