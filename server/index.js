@@ -3,6 +3,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import chatRoutes from "./routes/chatRoutes.js";
 import { rateLimiter } from "./middleware/rateLimiter.js";
+import chatHistoryRoutes from "./routes/chatHistoryRoutes.js";
+import { connectDB } from "./config/db.js";
+import weatherRoutes from "./routes/weatherRoutes.js";
 
 dotenv.config();
 
@@ -33,14 +36,18 @@ app.use(
   })
 );
 
+// Required to populate req.body on POST/PATCH requests.
+// Without this every controller reading req.body was receiving `undefined`.
 app.use(express.json());
 
-app.use(rateLimiter);
+app.use("/api/chat", rateLimiter);
 
 app.use("/api", chatRoutes);
-
+app.use("/api/chats", chatHistoryRoutes);
+app.use("/api/weather", weatherRoutes);
 const PORT = process.env.PORT || 5000;
 
+await connectDB();
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -12,21 +12,26 @@ import useSpeech from "../hooks/useSpeech";
 import { IoSend } from "react-icons/io5";
 import { FaMicrophone } from "react-icons/fa";
 
-import gtaBg from "../images/background.jpg";
+import gtaBg from "../images/background.jpg"
 
 function Assistant() {
-
+ const [currentChat, setCurrentChat] = useState(null);
+const [refreshChats, setRefreshChats] = useState(0);
   
 
-  const {
-    message,
-    setMessage,
-    messages,
-    loading,
-    sendMessage,
-    chatEndRef,
-  } = useChat("michael");
-
+ const {
+  message,
+  setMessage,
+  messages,
+  loading,
+  sendMessage,
+  chatEndRef,
+} = useChat(
+  "michael",
+  currentChat,
+  setCurrentChat,
+  setRefreshChats
+);
   const {
     listening,
     startListening,
@@ -38,7 +43,11 @@ function Assistant() {
   return (
     <div className="flex h-screen overflow-hidden">
 
-      <Sidebar />
+     <Sidebar
+  currentChat={currentChat}
+  setCurrentChat={setCurrentChat}
+  refreshChats={refreshChats}
+/>
 
       <div className="flex-1 relative bg-black text-white overflow-hidden">
 
@@ -100,7 +109,7 @@ function Assistant() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === "Enter" && !loading) {
                     sendMessage();
                   }
                 }}
@@ -127,6 +136,7 @@ function Assistant() {
 
               <motion.button
                 onClick={() => sendMessage()}
+                disabled={loading}
                 whileHover={{
                   scale: 1.05,
                 }}
@@ -145,6 +155,8 @@ function Assistant() {
                   flex
                   items-center
                   gap-2
+                  disabled:opacity-50
+                  disabled:cursor-not-allowed
                 "
               >
                 <IoSend size={20} />

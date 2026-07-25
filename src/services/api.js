@@ -1,4 +1,6 @@
-const API_URL = "https://gta-assistant.onrender.com";
+const API_URL = import.meta.env.DEV
+  ? "http://localhost:5000"
+  : "https://gta-assistant.onrender.com";
 
 export async function askBackend(history, character = "michael") {
   const response = await fetch(`${API_URL}/api/chat`, {

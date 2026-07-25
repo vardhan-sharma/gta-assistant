@@ -1,0 +1,8 @@
+# Environment
+.env
+
+# Google Cloud Key
+google-tts-key.json
+
+# Node modules
+node_modules/

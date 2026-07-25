@@ -5,80 +5,99 @@ import { askOpenRouter } from "./openrouter.js";
 const providers = [
   {
     name: "Gemini",
-    icon: "🟢",
     fn: askGemini,
   },
   {
     name: "Groq",
-    icon: "🔵",
     fn: askGroq,
   },
   {
     name: "OpenRouter",
-    icon: "🟠",
     fn: askOpenRouter,
   },
 ];
 
-function shouldFallback(err) {
-  console.dir(err, { depth: null });
-
+function shouldFallback(error) {
   const status =
-    Number(err?.status) ||
-    Number(err?.code) ||
-    Number(err?.response?.status) ||
-    Number(err?.error?.code);
+    error?.status ||
+    error?.response?.status ||
+    error?.error?.code ||
+    error?.code;
 
-  const message = JSON.stringify(err).toLowerCase();
+  const message = (
+    error?.message ||
+    JSON.stringify(error) ||
+    ""
+  ).toLowerCase();
 
   console.log("Status:", status);
+  console.log("Message:", message);
 
-  return (
-    [429, 500, 502, 503, 504].includes(status) ||
-    message.includes("resource_exhausted") ||
-    message.includes("quota") ||
-    message.includes("unavailable") ||
-    message.includes("timeout") ||
-    message.includes("network")
-  );
+  // HTTP status based fallback
+  if ([400, 401, 403, 408, 409, 425, 429, 500, 502, 503, 504].includes(Number(status))) {
+    return true;
+  }
+
+  // Message based fallback
+  const fallbackMessages = [
+    "api key",
+    "api_key_invalid",
+    "invalid api key",
+    "quota",
+    "resource_exhausted",
+    "rate limit",
+    "429",
+    "network",
+    "timeout",
+    "temporarily unavailable",
+    "service unavailable",
+    "internal server error",
+    "connection",
+    "fetch failed",
+    "econnreset",
+    "socket hang up",
+  ];
+
+  return fallbackMessages.some((text) => message.includes(text));
 }
 
 export async function generateReply(history, character) {
-  let lastError = null;
+  let lastError;
 
   for (const provider of providers) {
-    const start = Date.now();
+    console.log("\n==============================");
+    console.log(`🚀 Trying ${provider.name}`);
 
     try {
-      console.log(`${provider.icon} Using ${provider.name}...`);
+      const start = Date.now();
 
       const reply = await provider.fn(history, character);
 
       console.log(
-        `✅ ${provider.name} responded in ${Date.now() - start} ms`
+        `✅ ${provider.name} Success (${Date.now() - start} ms)`
       );
 
       return {
         reply,
         provider: provider.name,
       };
+    } catch (error) {
+      lastError = error;
 
-    } catch (err) {
-      lastError = err;
+      console.error(`❌ ${provider.name} Failed`);
+      console.dir(error, { depth: null });
 
-      console.error(
-        `❌ ${provider.name} Failed (${Date.now() - start} ms)`
-      );
-
-      console.error(err);
-
-      if (!shouldFallback(err)) {
-        throw err;
+      if (shouldFallback(error)) {
+        console.log(`➡ Falling back from ${provider.name}...`);
+        continue;
       }
 
-      console.log("➡ Trying next provider...\n");
+      console.log(`⛔ Non-fallback error from ${provider.name}`);
+      throw error;
     }
   }
+
+  console.log("❌ All AI providers failed");
 
   throw lastError || new Error("All AI providers are unavailable.");
 }

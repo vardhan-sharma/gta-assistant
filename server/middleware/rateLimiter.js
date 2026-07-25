@@ -1,6 +1,9 @@
 const requestStore = new Map();
 
 export function rateLimiter(req, res, next) {
+  if (process.env.NODE_ENV !== "production") {
+  return next();
+}
   const ip =
     req.headers["x-forwarded-for"] ||
     req.socket.remoteAddress;
