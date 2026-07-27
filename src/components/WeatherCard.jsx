@@ -5,19 +5,22 @@ export default function WeatherCard() {
  const { weather, loading, error } = useWeather();
 
   if (loading) {
-    if (error) {
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
-      <p className="text-red-400 text-sm">{error}</p>
+      <p className="text-zinc-400 text-sm">Loading weather...</p>
     </div>
   );
 }
-    return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
-        <p className="text-zinc-400 text-sm">Loading weather...</p>
-      </div>
-    );
-  }
+
+if (error || !weather) {
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
+      <p className="text-red-400 text-sm">
+        Weather unavailable
+      </p>
+    </div>
+  );
+}
 
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 hover:border-violet-500 transition-all duration-300">
