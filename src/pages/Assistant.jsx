@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import ChatArea from "../components/ChatArea";
 import MessageBubble from "../components/MessageBubble";
+import CallingOverlay from "../components/CallingOverlay";
+import ConnectedOverlay from "../components/ConnectedOverlay";
 
 import useChat from "../hooks/useChat";
 import useSpeech from "../hooks/useSpeech";
@@ -12,26 +14,29 @@ import useSpeech from "../hooks/useSpeech";
 import { IoSend } from "react-icons/io5";
 import { FaMicrophone } from "react-icons/fa";
 
-import gtaBg from "../images/background.jpg"
+import vapi from "../services/vapiService";
+
+import gtaBg from "../images/background.jpg";
 
 function Assistant() {
- const [currentChat, setCurrentChat] = useState(null);
-const [refreshChats, setRefreshChats] = useState(0);
-  
+  const [currentChat, setCurrentChat] = useState(null);
+  const [refreshChats, setRefreshChats] = useState(0);
+  const [callState, setCallState] = useState("idle");
 
- const {
-  message,
-  setMessage,
-  messages,
-  loading,
-  sendMessage,
-  chatEndRef,
-} = useChat(
-  "michael",
-  currentChat,
-  setCurrentChat,
-  setRefreshChats
-);
+  const {
+    message,
+    setMessage,
+    messages,
+    loading,
+    sendMessage,
+    chatEndRef,
+  } = useChat(
+    "michael",
+    currentChat,
+    setCurrentChat,
+    setRefreshChats
+  );
+
   const {
     listening,
     startListening,
@@ -39,15 +44,61 @@ const [refreshChats, setRefreshChats] = useState(0);
   } = useSpeech(setMessage, (text) => {
     sendMessage(text);
   });
-  
-  return (
-    <div className="flex h-screen overflow-hidden">
 
-     <Sidebar
-  currentChat={currentChat}
-  setCurrentChat={setCurrentChat}
-  refreshChats={refreshChats}
-/>
+  const startCall = async () => {
+    try {
+      setCallState("calling");
+      console.log("Public Key:", import.meta.env.VITE_VAPI_PUBLIC_KEY);
+      console.log("Assistant ID:", import.meta.env.VITE_VAPI_ASSISTANT_ID);
+      await vapi.start(
+        import.meta.env.VITE_VAPI_ASSISTANT_ID
+      );
+    } catch (err) {
+      console.error("Vapi start error:", err);
+      console.error("Message:", err?.message);
+      console.error("Full error:", JSON.stringify(err, null, 2));
+      setCallState("idle");
+    }
+  };
+
+  const endCall = async () => {
+    try {
+      await vapi.stop();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+
+    const handleCallStart = () => {
+      console.log("Call Started");
+      setCallState("connected");
+    };
+
+    const handleCallEnd = () => {
+      console.log("Call Ended");
+      setCallState("idle");
+    };
+
+    vapi.on("call-start", handleCallStart);
+    vapi.on("call-end", handleCallEnd);
+
+    return () => {
+      vapi.off("call-start", handleCallStart);
+      vapi.off("call-end", handleCallEnd);
+    };
+
+  }, []);
+
+  return (
+        <div className="flex h-screen overflow-hidden">
+
+      <Sidebar
+        currentChat={currentChat}
+        setCurrentChat={setCurrentChat}
+        refreshChats={refreshChats}
+      />
 
       <div className="flex-1 relative bg-black text-white overflow-hidden">
 
@@ -65,7 +116,10 @@ const [refreshChats, setRefreshChats] = useState(0);
         {/* Main */}
         <div className="relative z-10 flex flex-col h-full">
 
-          <Header />
+          <Header
+            callState={callState}
+            onCall={startCall}
+          />
 
           <ChatArea>
 
@@ -99,7 +153,8 @@ const [refreshChats, setRefreshChats] = useState(0);
             <div ref={chatEndRef} />
 
           </ChatArea>
-                    {/* Bottom Input */}
+
+          {/* Bottom Input */}
 
           <div className="border-t border-violet-500/20 bg-[#09090b]/80 backdrop-blur-2xl px-6 py-5">
 
@@ -137,12 +192,8 @@ const [refreshChats, setRefreshChats] = useState(0);
               <motion.button
                 onClick={() => sendMessage()}
                 disabled={loading}
-                whileHover={{
-                  scale: 1.05,
-                }}
-                whileTap={{
-                  scale: 0.95,
-                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 className="
                   h-16
                   px-8
@@ -166,26 +217,26 @@ const [refreshChats, setRefreshChats] = useState(0);
               {/* Voice Mode */}
 
               <motion.button
-  onClick={startListening}
-  whileHover={{ scale: 1.05 }}
-  whileTap={{ scale: 0.95 }}
-  className={`
-    h-16
-    w-16
-    rounded-2xl
-    border
-    flex
-    items-center
-    justify-center
-    ${
-      listening
-        ? "bg-red-600 border-red-500 text-white"
-        : "bg-zinc-900 border-violet-500 text-violet-400"
-    }
-  `}
->
-  <FaMicrophone size={22} />
-</motion.button>
+                onClick={listening ? undefined : startListening}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`
+                  h-16
+                  w-16
+                  rounded-2xl
+                  border
+                  flex
+                  items-center
+                  justify-center
+                  ${
+                    listening
+                      ? "bg-red-600 border-red-500 text-white"
+                      : "bg-zinc-900 border-violet-500 text-violet-400"
+                  }
+                `}
+              >
+                <FaMicrophone size={22} />
+              </motion.button>
 
             </div>
 
@@ -194,6 +245,16 @@ const [refreshChats, setRefreshChats] = useState(0);
         </div>
 
       </div>
+
+      <CallingOverlay
+        open={callState === "calling"}
+        onCancel={endCall}
+      />
+
+      <ConnectedOverlay
+        open={callState === "connected"}
+        onEnd={endCall}
+      />
 
     </div>
   );
