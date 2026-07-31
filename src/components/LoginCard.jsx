@@ -66,17 +66,27 @@ export default function LoginCard() {
 
       const user = result.user;
 
-setFirebaseUser(user);
+      setFirebaseUser(user);
 
-const profile = await getProfile(user.uid);
+      const profile = await getProfile(user.uid);
 
-if (profile) {
-  navigate("/get-started");
-} else {
-  setStep("profile");
-}
-    } catch (err) {
-      alert(err.message);
+      if (profile) {
+
+        localStorage.setItem(
+          "userProfile",
+          JSON.stringify(profile)
+        );
+
+        navigate("/get-started");
+
+      } else {
+
+        setStep("profile");
+
+      }
+    } catch (error) {
+      console.error("Error during Google login:", error);
+      alert("Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -90,8 +100,9 @@ if (profile) {
     try {
       setLoading(true);
 
+      let result;
       if (isLogin) {
-        const result =
+        result =
           await signInWithEmailAndPassword(
             auth,
             email,
@@ -102,7 +113,7 @@ if (profile) {
 
       } else {
 
-        const result =
+        result =
           await createUserWithEmailAndPassword(
             auth,
             email,
@@ -125,18 +136,27 @@ if (profile) {
 
       const user = result.user;
 
-setFirebaseUser(user);
+      setFirebaseUser(user);
 
-const profile = await getProfile(user.uid);
+      const profile = await getProfile(user.uid);
 
-if (profile) {
-  navigate("/get-started");
-} else {
-  setStep("profile");
-}
+      if (profile) {
 
-    } catch (err) {
-      alert(err.message);
+        localStorage.setItem(
+          "userProfile",
+          JSON.stringify(profile)
+        );
+
+        navigate("/get-started");
+
+      } else {
+
+        setStep("profile");
+
+      }
+    } catch (error) {
+      console.error("Error during email auth:", error);
+      alert("Authentication failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -394,42 +414,45 @@ if (profile) {
 
           <button
             onClick={async () => {
+              try {
+                if (!name.trim()) {
+                  alert("Please enter your name.");
+                  return;
+                }
 
-              if (!name.trim()) {
-                alert("Please enter your name.");
-                return;
+                if (!dob) {
+                  alert("Please select your date of birth.");
+                  return;
+                }
+
+                if (!gender) {
+                  alert("Please select your gender.");
+                  return;
+                }
+
+                // MongoDB Save
+                // Coming Next
+
+                await createProfile({
+                  uid: firebaseUser.uid,
+                  email: firebaseUser.email,
+                  name,
+                  dob,
+                  gender,
+                });
+                localStorage.setItem(
+                  "userProfile",
+                  JSON.stringify({
+                    name,
+                    dob,
+                    gender,
+                  })
+                );
+                navigate("/get-started");
+              } catch (error) {
+                console.error("Error creating profile:", error);
+                alert("Failed to create profile. Please try again.");
               }
-
-              if (!dob) {
-                alert("Please select your date of birth.");
-                return;
-              }
-
-              if (!gender) {
-                alert("Please select your gender.");
-                return;
-              }
-
-              // MongoDB Save
-              // Coming Next
-
-             await createProfile({
-  uid: firebaseUser.uid,
-  email: firebaseUser.email,
-  name,
-  dob,
-  gender,
-});
-localStorage.setItem(
-  "userProfile",
-  JSON.stringify({
-    name,
-    dob,
-    gender,
-  })
-);
-navigate("/get-started");
-
             }}
             className="mt-8 h-14 w-full rounded-2xl bg-violet-600 font-semibold transition hover:bg-violet-500 hover:scale-[1.02]"
           >
