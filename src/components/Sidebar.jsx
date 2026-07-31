@@ -18,13 +18,19 @@ export default function Sidebar({
   }, [refreshChats]);
 
   async function fetchChats() {
-    try {
-      const data = await getChats();
-      setChats(data);
-    } catch (err) {
-      console.error("Failed to fetch chats:", err);
-    }
+  try {
+    console.log("Sidebar getChats called");
+
+    const data = await getChats();
+
+    console.log("Returned:", data);
+
+    setChats(data);
+
+  } catch (err) {
+    console.error(err);
   }
+}
 
   async function handleChatClick(id) {
     try {

@@ -3,9 +3,16 @@ import Chat from "../models/chat.js";
 // Create New Chat
 export const createChat = async (req, res) => {
   try {
-    const { title, character, messages } = req.body;
+    const { uid, title, character, messages } = req.body;
+
+    if (!uid) {
+      return res.status(400).json({
+        error: "UID is required.",
+      });
+    }
 
     const chat = await Chat.create({
+      uid,
       title,
       character,
       messages,
@@ -24,7 +31,15 @@ export const createChat = async (req, res) => {
 // Get All Chats
 export const getChats = async (req, res) => {
   try {
-    const chats = await Chat.find()
+    const { uid } = req.query;
+
+    if (!uid) {
+      return res.status(400).json({
+        error: "UID is required.",
+      });
+    }
+
+    const chats = await Chat.find({ uid })
       .sort({ updatedAt: -1 })
       .select("_id title character updatedAt");
 
@@ -41,7 +56,12 @@ export const getChats = async (req, res) => {
 // Get Single Chat
 export const getChatById = async (req, res) => {
   try {
-    const chat = await Chat.findById(req.params.id);
+    const { uid } = req.query;
+
+    const chat = await Chat.findOne({
+      _id: req.params.id,
+      uid,
+    });
 
     if (!chat) {
       return res.status(404).json({
@@ -62,10 +82,13 @@ export const getChatById = async (req, res) => {
 // Update Chat
 export const updateChat = async (req, res) => {
   try {
-    const { title, character, messages } = req.body;
+    const { uid, title, character, messages } = req.body;
 
-    const chat = await Chat.findByIdAndUpdate(
-      req.params.id,
+    const chat = await Chat.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        uid,
+      },
       {
         title,
         character,
@@ -95,7 +118,12 @@ export const updateChat = async (req, res) => {
 // Delete Chat
 export const deleteChat = async (req, res) => {
   try {
-    const chat = await Chat.findByIdAndDelete(req.params.id);
+    const { uid } = req.body;
+
+    const chat = await Chat.findOneAndDelete({
+      _id: req.params.id,
+      uid,
+    });
 
     if (!chat) {
       return res.status(404).json({

@@ -1,3 +1,4 @@
+import { auth } from "../firebase/firebase";
 import { useEffect, useRef, useState } from "react";
 
 import { askBackend } from "../services/api";
@@ -15,12 +16,7 @@ export default function useChat(
 ) {
   const [message, setMessage] = useState("");
 
-  const [messages, setMessages] = useState([
-    {
-      sender: "ai",
-      text: "👋 Yo bhai! Michael AI me welcome. Kya help chahiye?",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -45,25 +41,39 @@ export default function useChat(
   }, [messages]);
 
   useEffect(() => {
-    if (!currentChat) {
-      setMessages([
-        {
-          sender: "ai",
-          text: "👋 Yo bhai! Michael AI me welcome. Kya help chahiye?",
-        },
-      ]);
+  if (!currentChat) {
+    const profile = JSON.parse(localStorage.getItem("userProfile"));
 
-      return;
+    const name = profile?.name || "Friend";
+    const gender = profile?.gender || "";
+
+    let greeting = "";
+
+    if (gender === "male") {
+      greeting = `🙏 Namaste ${name} Bhai! Main Michael AI hoon. Aaj main aapki kis cheez me madad kar sakta hoon?`;
+    } else if (gender === "female") {
+      greeting = `🌸 Hello ${name} Ma'am! Main Michael AI hoon. Aaj main aapki kis cheez me madad kar sakta hoon?`;
+    } else {
+      greeting = `👋 Hello ${name}! Main Michael AI hoon. Aaj main aapki kis cheez me madad kar sakta hoon?`;
     }
 
-    const formatted = currentChat.messages.map((msg) => ({
-      sender: msg.role === "user" ? "user" : "ai",
-      text:
-        msg.parts?.map((part) => part.text).join("") || "",
-    }));
+    setMessages([
+      {
+        sender: "ai",
+        text: greeting,
+      },
+    ]);
 
-    setMessages(formatted);
-  }, [currentChat]);
+    return;
+  }
+
+  const formatted = currentChat.messages.map((msg) => ({
+    sender: msg.role === "user" ? "user" : "ai",
+    text: msg.parts?.map((part) => part.text).join("") || "",
+  }));
+
+  setMessages(formatted);
+}, [currentChat]);
 
   function toGeminiHistory(uiMessages) {
     return uiMessages.map((msg) => ({
@@ -108,23 +118,31 @@ export default function useChat(
       let chat = currentChat;
 
       if (!chat) {
-        chat = await createChat({
-          title:
-            finalMessage.length > 40
-              ? finalMessage.slice(0, 40) + "..."
-              : finalMessage,
+       chat = await createChat({
+  uid: auth.currentUser.uid,
 
-          character,
+  title:
+    finalMessage.length > 40
+      ? finalMessage.slice(0, 40) + "..."
+      : finalMessage,
 
-          messages: history,
-        });
+  character,
+
+  messages: history,
+});
 
         setCurrentChat(chat);
 
         setRefreshChats((prev) => prev + 1);
       }
-
-      const result = await askBackend(history, character);
+      const profile = JSON.parse(
+  localStorage.getItem("userProfile")
+);
+      const result = await askBackend(
+  history,
+  character,
+  profile
+);
       console.log("AI Result:", result);
 
       const aiReply = result.reply;

@@ -1,49 +1,71 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+
+import loadingVideo from "../assets/videos/loading.mp4";
 
 function Loading() {
   const navigate = useNavigate();
+  const videoRef = useRef(null);
 
   useEffect(() => {
+    // Play video
+    videoRef.current?.play().catch((err) => {
+      console.error("Video Play Error:", err);
+    });
+
+    // Navigate after 4 seconds
     const timer = setTimeout(() => {
       navigate("/character-select");
-    }, 3000);
+    }, 4000);
 
     return () => clearTimeout(timer);
   }, [navigate]);
 
   return (
-    <div className="h-screen bg-black flex flex-col items-center justify-center text-white">
+    <div className="relative h-screen w-screen overflow-hidden bg-black">
 
-      <motion.h1
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="text-5xl font-bold tracking-wider"
+      {/* Background Video */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        preload="auto"
+        className="absolute inset-0 h-full w-full object-cover"
       >
-        GTA Assistant
-      </motion.h1>
+        <source src={loadingVideo} type="video/mp4" />
+      </video>
 
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-4 text-gray-400"
-      >
-        Initializing Michael AI...
-      </motion.p>
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/10" />
 
-      <div className="mt-10 flex gap-3">
-        <span className="w-4 h-4 rounded-full bg-violet-500 animate-bounce"></span>
-        <span
-          className="w-4 h-4 rounded-full bg-violet-500 animate-bounce"
-          style={{ animationDelay: "0.2s" }}
-        ></span>
-        <span
-          className="w-4 h-4 rounded-full bg-violet-500 animate-bounce"
-          style={{ animationDelay: "0.4s" }}
-        ></span>
+      {/* Center Content */}
+      <div className="relative z-10 flex h-full flex-col items-center justify-center">
+
+        <h1
+          className="
+            text-5xl
+            md:text-6xl
+            font-black
+            tracking-[8px]
+            text-white
+            drop-shadow-2xl
+          "
+        >
+          
+        </h1>
+
+        <p
+          className="
+            mt-4
+            text-lg
+            tracking-[6px]
+            uppercase
+            text-white/80
+          "
+        >
+          
+        </p>
+
       </div>
 
     </div>

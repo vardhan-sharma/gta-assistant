@@ -2,7 +2,11 @@ import { generateReply } from "../services/aiManager.js";
 
 export const chatWithAI = async (req, res) => {
   try {
-    const { history, character } = req.body;
+    const {
+  history,
+  character,
+  profile,
+} = req.body;
 
     if (!history || history.length === 0) {
       return res.status(400).json({
@@ -10,8 +14,11 @@ export const chatWithAI = async (req, res) => {
       });
     }
 
-    const result = await generateReply(history, character);
-
+   const result = await generateReply(
+  history,
+  character,
+  profile
+);
     const cleanText = result.reply.replace(
       /[\u{1F300}-\u{1FAFF}]/gu,
       ""

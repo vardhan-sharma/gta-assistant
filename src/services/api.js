@@ -2,7 +2,11 @@ const API_URL = import.meta.env.DEV
   ? "http://localhost:5000"
   : "https://gta-assistant.onrender.com";
 
-export async function askBackend(history, character = "michael") {
+export async function askBackend(
+  history,
+  character = "michael",
+  profile = {}
+) {
   const response = await fetch(`${API_URL}/api/chat`, {
     method: "POST",
     headers: {
@@ -11,6 +15,7 @@ export async function askBackend(history, character = "michael") {
     body: JSON.stringify({
       history,
       character,
+      profile,
     }),
   });
 

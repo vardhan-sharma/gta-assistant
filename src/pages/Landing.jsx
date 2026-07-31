@@ -55,7 +55,7 @@ function Landing() {
 
         {/* Button */}
         <motion.button
-          onClick={() => navigate("/loading")}
+          onClick={() => navigate("/initialize")}
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
           className="mt-10 rounded-lg border-2 border-orange-500 px-10 py-4 text-xl font-bold text-orange-500 transition hover:bg-orange-500 hover:text-black"

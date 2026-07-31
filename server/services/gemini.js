@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-export async function askGemini(history, character) {
+export async function askGemini(history, character, profile) {
   try {
     const conversation = history
       .map(
@@ -29,7 +29,27 @@ Michael:
 `,
 
       config: {
-        systemInstruction: michaelPrompt,
+        systemInstruction: `
+${michaelPrompt}
+
+=========================
+CURRENT USER PROFILE
+=========================
+
+Name: ${profile.name || "Unknown"}
+
+Gender: ${profile.gender || "Unknown"}
+
+Date Of Birth: ${profile.dob || "Unknown"}
+
+IMPORTANT RULES
+
+- You already know the user's name.
+- Always address the user by their name.
+- Never say you don't know the user's name.
+- Never ask the user's name again.
+- Use the user's name naturally.
+`,
         temperature: 0.9,
         topP: 0.95,
         maxOutputTokens: 500,

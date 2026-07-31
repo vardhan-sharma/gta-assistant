@@ -61,7 +61,11 @@ function shouldFallback(error) {
   return fallbackMessages.some((text) => message.includes(text));
 }
 
-export async function generateReply(history, character) {
+export async function generateReply(
+  history,
+  character,
+  profile
+) {
   let lastError;
 
   for (const provider of providers) {
@@ -71,7 +75,11 @@ export async function generateReply(history, character) {
     try {
       const start = Date.now();
 
-      const reply = await provider.fn(history, character);
+      const reply = await provider.fn(
+  history,
+  character,
+  profile
+);
 
       console.log(
         `✅ ${provider.name} Success (${Date.now() - start} ms)`

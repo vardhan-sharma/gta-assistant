@@ -1,5 +1,6 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
+import Login from "./pages/Login";
 import Landing from "./pages/Landing";
 import Loading from "./pages/Loading";
 import CharacterSelect from "./pages/CharacterSelect";
@@ -9,20 +10,18 @@ import History from "./pages/History";
 function App() {
   return (
     <Routes>
-      {/* Landing */}
-      <Route path="/" element={<Landing />} />
+      {/* Authentication */}
+      <Route path="/" element={<Login />} />
 
-      {/* Loading */}
-      <Route path="/loading" element={<Loading />} />
-
-      {/* Character Selection */}
+      {/* Main Flow */}
+      <Route path="/get-started" element={<Landing />} />
+      <Route path="/initialize" element={<Loading />} />
       <Route path="/character-select" element={<CharacterSelect />} />
-
-      {/* Main Assistant */}
       <Route path="/assistant" element={<Assistant />} />
-
-      {/* Chat History */}
       <Route path="/history" element={<History />} />
+
+      {/* Redirect unknown routes */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

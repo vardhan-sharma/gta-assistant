@@ -6,6 +6,7 @@ import { rateLimiter } from "./middleware/rateLimiter.js";
 import chatHistoryRoutes from "./routes/chatHistoryRoutes.js";
 import { connectDB } from "./config/db.js";
 import weatherRoutes from "./routes/weatherRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.use(express.json());
 
 app.use("/api/chat", rateLimiter);
 
+app.use("/api/auth", authRoutes);
 app.use("/api", chatRoutes);
 app.use("/api/chats", chatHistoryRoutes);
 app.use("/api/weather", weatherRoutes);

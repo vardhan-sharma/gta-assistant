@@ -20,6 +20,11 @@ const messageSchema = new mongoose.Schema(
 
 const chatSchema = new mongoose.Schema(
   {
+    uid: {
+  type: String,
+  required: true,
+  index: true,
+},
     title: {
       type: String,
       required: true,
