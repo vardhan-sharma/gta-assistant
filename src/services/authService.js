@@ -1,4 +1,6 @@
-const API = "http://localhost:5000/api/auth";
+const API = import.meta.env.DEV
+  ? "http://localhost:5000/api/auth"
+  : "https://gta-assistant.onrender.com/api/auth";
 
 export const getProfile = async (uid) => {
   const res = await fetch(`${API}/profile/${uid}`);
